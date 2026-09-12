@@ -115,7 +115,7 @@ h1, h2, h3 { margin-bottom: 0; line-height: 1.25; letter-spacing: -0.045em; }
   position: relative; min-height: min(860px, 100vh); padding-top: var(--header-height); overflow: hidden;
   background: #fff;
 }
-.hero::after { position: absolute; right: 0; bottom: 0; width: 38%; height: 7px; content: ""; background: var(--red); }
+.hero::after { position: absolute; right: 0; bottom: 0; width: 38%; height: 3px; content: ""; background: rgba(230,71,55,.45); }
 .hero-inner {
   position: relative; z-index: 2; display: grid; min-height: calc(min(860px, 100vh) - var(--header-height));
   align-items: center; gap: 3rem; padding-block: 4rem;
@@ -123,7 +123,11 @@ h1, h2, h3 { margin-bottom: 0; line-height: 1.25; letter-spacing: -0.045em; }
 }
 .hero-copy { max-width: 860px; }
 .hero h1 { max-width: 920px; font-size: clamp(2.65rem, 5vw, 4.5rem); font-weight: 500; line-height: 1.17; }
-.hero h1 strong { position: relative; color: var(--red); font-weight: 800; }
+.hero h1 strong { position: relative; color: var(--navy); font-weight: 800; }
+.hero h1 strong::after {
+  position: absolute; right: 0; bottom: .05em; left: 0;
+  height: 4px; content: ""; background: var(--red); border-radius: 2px;
+}
 .hero-description { margin: 2rem 0 2.5rem; color: #535b66; font-size: clamp(1.02rem, 1.8vw, 1.26rem); line-height: 1.8; }
 .hero-actions { display: flex; flex-wrap: wrap; gap: .75rem; }
 
@@ -459,9 +463,15 @@ body.modal-open { overflow: hidden; }
 }
 .lecture-empty { grid-column: 1 / -1; padding: 2rem 0; color: var(--muted); font-size: .95rem; text-align: center; }
 .lecture-row {
+  position: relative; overflow: hidden;
   display: flex; flex-direction: column; justify-content: space-between; gap: 1.4rem; min-height: 150px;
   padding: 1.3rem 1.2rem; background: var(--white); border: 1px solid var(--line); border-radius: 14px;
   transition: box-shadow var(--transition), border-color var(--transition);
+}
+.lecture-row::before {
+  position: absolute; right: 8px; bottom: 8px; width: 56px; height: 56px;
+  content: ""; background: url("../img/dclay-icon-triangle.png") no-repeat center / contain;
+  opacity: .12; pointer-events: none;
 }
 .lecture-row:has(.lecture-row-link):hover { box-shadow: 0 14px 26px rgba(22,24,28,.08); border-color: var(--ink); }
 .lecture-row-title { margin: 0; font-size: .95rem; font-weight: 700; line-height: 1.45; }
