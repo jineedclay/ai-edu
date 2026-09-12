@@ -594,3 +594,7 @@ body.modal-open { overflow: hidden; }
 
 /* 워터마크를 더 옅게(배경처럼) */
 .lecture-row::after { opacity: .12; }
+
+
+      /* opacity re-tune: 0.12 too faint, try 0.3 */
+.lecture-row::after { opacity: 0.3; }
