@@ -572,3 +572,21 @@ body.modal-open { overflow: hidden; }
   html { scroll-behavior: auto; }
   *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; }
 }
+
+
+  /* Press release card watermark (institutions.html) */
+.lecture-row { position: relative; }
+.lecture-row::after {
+    content: "";
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    width: 40px;
+    height: 40px;
+    background-image: url("../img/card-watermark.png");
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    opacity: .7;
+    pointer-events: none;
+}
