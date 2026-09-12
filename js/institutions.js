@@ -1,12 +1,17 @@
 /**
  * 출강이력 페이지 (institutions.html) 전용 스크립트
  * ------------------------------------------------------------
- * 1) 먼저 구글시트("DClay 출강이력")를 CSV로 불러와 화면에 표시합니다.
- *    시트에 행을 추가/수정/삭제하면 새로고침 시 사이트에 그대로 반영됩니다.
- *    보도자료링크 칸에 URL을 넣으면 기관명이 자동으로 그 링크로 연결됩니다.
+ * 1) 먼저 구글시트("DClay 출강이력")를 CSV로 불러옵니다.
+ *    시트에는 "제목"과 "보도자료링크" 두 칼럼만 있으면 됩니다.
+ *    - 이미 화면에 있는 강의와 같은 제목의 행에 링크를 채우면, 그 강의 카드
+ *      제목이 자동으로 그 링크로 연결됩니다.
+ *    - 시트에만 있고 js/data/lectures.js 에는 없는 새 제목을 추가하면,
+ *      그 강의도 새 카드로 목록 맨 위에 자동으로 추가됩니다.
+ *    즉, 이제부터는 새 보도자료가 나올 때마다 구글시트에 "제목, 링크"만
+ *    입력하시면 됩니다. 기간/시간/기관 등은 몰라도 됩니다.
  * 2) 구글시트를 아직 "링크가 있는 모든 사용자"로 공개하지 않았거나,
- *    네트워크 문제로 불러오지 못하면 js/data/lectures.js 에 저장된
- *    목록으로 자동 대체합니다(화면 표시는 동일합니다).
+ *    네트워크 문제로 전혀 불러오지 못하면 js/data/lectures.js 에 저장된
+ *    목록으로만 화면을 채웁니다(이 경우 새로 추가한 링크는 반영되지 않습니다).
  */
 (() => {
   "use strict";
@@ -73,7 +78,9 @@
     return rows.filter((r) => r.some((cell) => cell.trim() !== ""));
   };
 
-  const rowsToLectures = (rows) => {
+  // 시트에는 "제목"과 "보도자료링크"만 있으면 되고, 기간/시간/기관/예정여부는
+  // 있으면 쓰고 없으면 빈 값으로 둡니다(둘 다 지원).
+  const rowsToSheetItems = (rows) => {
     if (!rows.length) return [];
     const [header, ...body] = rows;
     const idx = {
@@ -84,21 +91,51 @@
       upcoming: header.indexOf("예정여부"),
       link: header.indexOf("보도자료링크"),
     };
-    if (idx.title === -1 || idx.org === -1) return [];
+    if (idx.title === -1) return [];
 
     return body
       .map((cols) => {
-        const linkRaw = (cols[idx.link] || "").trim();
+        const linkRaw = (idx.link > -1 ? cols[idx.link] || "" : "").trim();
         return {
           title: (cols[idx.title] || "").trim(),
-          period: (cols[idx.period] || "").trim().replace(/^'/, ""),
-          hours: (cols[idx.hours] || "").trim(),
-          org: (cols[idx.org] || "").trim(),
-          upcoming: (cols[idx.upcoming] || "").trim() !== "",
+          period: idx.period > -1 ? (cols[idx.period] || "").trim().replace(/^'/, "") : "",
+          hours: idx.hours > -1 ? (cols[idx.hours] || "").trim() : "",
+          org: idx.org > -1 ? (cols[idx.org] || "").trim() : "",
+          upcoming: idx.upcoming > -1 ? (cols[idx.upcoming] || "").trim() !== "" : false,
           link: linkRaw ? linkRaw : null,
         };
       })
-      .filter((item) => item.title && item.org);
+      .filter((item) => item.title);
+  };
+
+  // 구글시트(제목+링크, 순서대로)를 로컬 lectures.js 목록과 제목 기준으로 합칩니다.
+  // - 로컬 목록에 있는 강의는 그대로 보여주되, 시트에 같은 제목의 링크가 있으면 그걸로 덮어씁니다.
+  // - 시트에만 있는(로컬에 없는) 제목은 새 카드로 목록 맨 위에 추가됩니다.
+  // - 같은 제목이 여러 번 있어도(강의를 여러 번 진행한 경우) 시트에 나온 순서대로
+  //   하나씩 짝지어 연결합니다.
+  const mergeWithLocal = (sheetItems) => {
+    const queues = new Map();
+    sheetItems.forEach(({ title, link }) => {
+      if (!title) return;
+      if (!queues.has(title)) queues.set(title, []);
+      queues.get(title).push(link || null);
+    });
+
+    const localList = typeof LECTURES !== "undefined" ? LECTURES : [];
+    const merged = localList.map((item) => {
+      const queue = queues.get(item.title);
+      const link = queue && queue.length ? queue.shift() : item.link || null;
+      return { ...item, link };
+    });
+
+    const extras = [];
+    queues.forEach((links, title) => {
+      links.forEach((link) => {
+        extras.push({ title, period: "", hours: "", org: "", upcoming: false, link });
+      });
+    });
+
+    return [...extras, ...merged];
   };
 
   const getPageFromHash = () => {
@@ -109,15 +146,26 @@
     return page;
   };
 
+  // 카드 제목(title) 자체를 클릭 가능한 링크로 감쌉니다.
+  // item.link 가 없으면 이전처럼 그냥 텍스트로 표시됩니다.
+  const escapeHtml = (str) =>
+    String(str).replace(/[&<>"']/g, (ch) => ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#39;",
+    }[ch]));
+
   const renderRow = (item) => {
-    const linkTag = item.link
-      ? `<a class="lecture-row-link" href="${item.link}" target="_blank" rel="noopener">보도자료 <span aria-hidden="true">↗</span></a>`
-      : "";
+    const safeTitle = escapeHtml(item.title);
+    const titleHtml = item.link
+      ? `<a class="lecture-row-title-link" href="${escapeHtml(item.link)}" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;">${safeTitle} <span aria-hidden="true" style="opacity:.6;">↗</span></a>`
+      : safeTitle;
 
     return `
-      <article class="lecture-row">
-        <p class="lecture-row-title">${item.title}</p>
-        ${linkTag}
+      <article class="lecture-row${item.link ? " has-link" : ""}">
+        <p class="lecture-row-title">${titleHtml}</p>
       </article>
     `;
   };
@@ -184,7 +232,7 @@
         const res = await fetch(`${url}&_=${Date.now()}`);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const text = await res.text();
-        const parsed = rowsToLectures(parseCSV(text));
+        const parsed = rowsToSheetItems(parseCSV(text));
         if (parsed.length === 0) throw new Error("empty sheet data");
         return parsed;
       } catch (err) {
@@ -197,7 +245,7 @@
 
   fetchSheet().then((parsed) => {
     if (parsed) {
-      startWith(parsed);
+      startWith(mergeWithLocal(parsed));
     } else {
       fallbackToLocalData();
     }
