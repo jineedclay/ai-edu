@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>출강이력 | DClay AI 교육</title>
+  <meta name="description" content="DClay 이혜진 강사가 그동안 출강한 기관과 교육 프로그램 이력">
+  <meta name="theme-color" content="#ffffff">
+  <link rel="stylesheet" href="css/style.css?v=20260912-1">
+  <script src="js/main.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">본문 바로가기</a>
+
+  <header class="site-header" id="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="index.html#top" aria-label="DClay 홈으로 이동">
+        <img src="img/dclay-logo@2x.png" alt="DClay" width="289" height="94">
+      </a>
+      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="primary-navigation" aria-label="메뉴 열기">
+        <span></span><span></span><span></span>
+      </button>
+      <nav class="primary-nav" id="primary-navigation" aria-label="주요 메뉴">
+        <a href="index.html#curriculum">교육과정</a>
+        <a href="index.html#education-cases">교육사례</a>
+        <a href="institutions.html" aria-current="page">출강이력</a>
+        <a href="index.html#about-dclay">DClay 소개</a>
+        <a class="nav-cta" href="index.html#education-inquiry">교육문의</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main-content">
+    <div class="subpage-hero">
+      <div class="container">
+        <p class="breadcrumb"><a href="index.html">홈</a> <span aria-hidden="true">/</span> <span>출강이력</span></p>
+        <h1>출강이력</h1>
+        <p>공공기관·기업·학교·평생교육기관 등 다양한 현장에서 진행한 AI 실무교육 이력입니다. 보도자료·관련 기사가 확인되는 항목은 기관명에 링크가 함께 표시됩니다.</p>
+      </div>
+    </div>
+
+    <section class="section" style="padding-block: 0 clamp(4rem, 8vw, 7rem);">
+      <div class="container">
+        <div class="lecture-summary">
+          <strong id="lecture-count">0</strong>
+          <span>건의 교육 실적</span>
+          <span class="lecture-range" id="lecture-range"></span>
+        </div>
+
+        <div class="lecture-list" id="lecture-list" aria-live="polite"></div>
+
+        <nav class="lecture-pager" id="lecture-pager" aria-label="출강이력 페이지 이동"></nav>
+
+        <div class="back-home">
+          <a class="button button-secondary" href="index.html#top">← 홈 화면으로 돌아가기</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer" id="contact-information">
+    <div class="container footer-main">
+      <div class="footer-brand">
+        <img src="img/dclay-logo@2x.png" alt="DClay" width="289" height="94" loading="lazy">
+        <p>생성형 AI · 데이터 활용 실무교육</p>
+      </div>
+      <dl class="footer-information">
+        <div><dt>상호</dt><dd>(주)디클레이</dd></div>
+        <div><dt>대표</dt><dd>이혜진</dd></div>
+        <div><dt>연락처</dt><dd>010-5664-6833</dd></div>
+        <div><dt>이메일</dt><dd>jineedclay@gmail.com</dd></div>
+        <div><dt>주소</dt><dd>경기도 안양시 동안구 시민대로 230, 지니센터 D동 5593호</dd></div>
+      </dl>
+    </div>
+    <div class="container footer-bottom">
+      <p>© DClay. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <button class="top-button" id="top-button" type="button" aria-label="페이지 맨 위로 이동"><span aria-hidden="true">↑</span>TOP</button>
+
+  <script src="js/data/lectures.js"></script>
+  <script src="js/institutions.js" defer></script>
+</body>
+</html>
