@@ -12,8 +12,13 @@
   "use strict";
 
   const PER_PAGE = 30;
-  const SHEET_CSV_URL =
-    "https://docs.google.com/spreadsheets/d/1N8DcssiUqdSO67Hp3fsdw9Fop0gs8w1n1n6lhuxCdiE/export?format=csv&gid=0";
+  const SHEET_ID = "1N8DcssiUqdSO67Hp3fsdw9Fop0gs8w1n1n6lhuxCdiE";
+  // 구글시트를 못 불러오는 경우(네트워크/일시적 문제 등)를 대비해 두 가지 방식으로
+  // 순서대로 시도합니다. 하나가 실패해도 다른 하나로 재시도합니다.
+  const SHEET_CSV_URLS = [
+    `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv`,
+    `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv`,
+  ];
 
   const listEl = document.querySelector("#lecture-list");
   const pagerEl = document.querySelector("#lecture-pager");
@@ -104,23 +109,15 @@
     return page;
   };
 
-  const renderRow = (item, displayIndex) => {
-    const badge = item.upcoming ? '<span class="lecture-badge">예정</span>' : "";
-    const orgContent = item.link
-      ? `<a href="${item.link}" target="_blank" rel="noopener">${item.org} <span aria-hidden="true">↗</span></a>`
-      : item.org;
+  const renderRow = (item) => {
+    const linkTag = item.link
+      ? `<a class="lecture-row-link" href="${item.link}" target="_blank" rel="noopener">보도자료 <span aria-hidden="true">↗</span></a>`
+      : "";
 
     return `
       <article class="lecture-row">
-        <div class="lecture-row-index">${String(displayIndex).padStart(2, "0")}</div>
-        <div class="lecture-row-body">
-          <p class="lecture-row-title">${item.title}${badge}</p>
-          <p class="lecture-row-org">${orgContent}</p>
-        </div>
-        <div class="lecture-row-meta">
-          <span>${item.period}</span>
-          <span>${item.hours}</span>
-        </div>
+        <p class="lecture-row-title">${item.title}</p>
+        ${linkTag}
       </article>
     `;
   };
@@ -145,7 +142,7 @@
     const end = Math.min(start + PER_PAGE, DATA.length);
     const pageItems = DATA.slice(start, end);
 
-    listEl.innerHTML = pageItems.map((item, i) => renderRow(item, start + i + 1)).join("");
+    listEl.innerHTML = pageItems.map((item) => renderRow(item)).join("");
 
     if (rangeEl) {
       rangeEl.textContent = DATA.length === 0 ? "" : `${start + 1}–${end}번째`;
@@ -181,17 +178,28 @@
     }
   };
 
-  fetch(`${SHEET_CSV_URL}&_=${Date.now()}`)
-    .then((res) => {
-      if (!res.ok) throw new Error("sheet fetch failed");
-      return res.text();
-    })
-    .then((text) => {
-      const parsed = rowsToLectures(parseCSV(text));
-      if (parsed.length === 0) throw new Error("empty sheet data");
+  const fetchSheet = async () => {
+    for (const url of SHEET_CSV_URLS) {
+      try {
+        const res = await fetch(`${url}&_=${Date.now()}`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const text = await res.text();
+        const parsed = rowsToLectures(parseCSV(text));
+        if (parsed.length === 0) throw new Error("empty sheet data");
+        return parsed;
+      } catch (err) {
+        // 콘솔에 원인을 남겨서, 문제가 계속되면 개발자 도구로 확인할 수 있게 합니다.
+        console.warn("[출강이력] 구글시트 불러오기 실패:", url, err);
+      }
+    }
+    return null;
+  };
+
+  fetchSheet().then((parsed) => {
+    if (parsed) {
       startWith(parsed);
-    })
-    .catch(() => {
+    } else {
       fallbackToLocalData();
-    });
+    }
+  });
 })();
