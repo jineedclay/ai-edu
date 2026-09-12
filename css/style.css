@@ -590,3 +590,7 @@ body.modal-open { overflow: hidden; }
     opacity: .7;
     pointer-events: none;
 }
+
+
+/* 워터마크를 더 옅게(배경처럼) */
+.lecture-row::after { opacity: .12; }
