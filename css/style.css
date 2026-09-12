@@ -72,8 +72,8 @@ h1, h2, h3 { margin-bottom: 0; line-height: 1.25; letter-spacing: -0.045em; }
 .brand img {
   width: auto;
   height: auto;
-  max-width: 150px;
-  max-height: 42px;
+  max-width: 290px;
+  max-height: 56px;
   object-fit: contain;
 }
 .menu-toggle {
@@ -561,7 +561,7 @@ body.modal-open { overflow: hidden; }
 @media (max-width: 699px) {
   :root { --header-height: 72px; }
   .brand { width: auto; height: auto; }
-  .brand img { width: auto; height: auto; max-width: 126px; max-height: 36px; object-fit: contain; }
+  .brand img { width: auto; height: auto; max-width: 235px; max-height: 46px; object-fit: contain; }
   .hero { min-height: auto; }
   .hero-inner { min-height: auto; padding-block: 3.5rem 3rem; }
   .hero h1 { font-size: clamp(2.35rem,11vw,3.4rem); }
@@ -572,29 +572,3 @@ body.modal-open { overflow: hidden; }
   html { scroll-behavior: auto; }
   *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; }
 }
-
-
-  /* Press release card watermark (institutions.html) */
-.lecture-row { position: relative; }
-.lecture-row::after {
-    content: "";
-    position: absolute;
-    right: 10px;
-    bottom: 10px;
-    width: 40px;
-    height: 40px;
-    background-image: url("../img/card-watermark.png");
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: center;
-    opacity: .7;
-    pointer-events: none;
-}
-
-
-/* 워터마크를 더 옅게(배경처럼) */
-.lecture-row::after { opacity: .12; }
-
-
-      /* opacity re-tune: 0.12 too faint, try 0.3 */
-.lecture-row::after { opacity: 0.3; }
